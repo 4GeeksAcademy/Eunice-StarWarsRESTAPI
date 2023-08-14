@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Characters
 # from models import Person
 
 app = Flask(__name__)
@@ -41,14 +41,16 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+# <-- User Methods -->
+
 
 @app.route("/user", methods=["GET"])
 def handle_hello():
     users = User.query.all()
-    if users is None:
+    if not users:
         raise APIException(
             f"No users", status_code=400)
-    all_user = list(map(lambda users: users.serialize(), users))
+    all_user = list(map(lambda user: user.serialize(), users))
 
     response_body = {
         "msg": "Hello, this is your GET /user response ",
@@ -72,10 +74,9 @@ def post_user():
 
     user = User(username=request_body["username"],
                 email=request_body["email"], password=request_body["password"])
-
     user.add()
 
-    return jsonify({"msg": "Completed"})
+    return jsonify({"msg": "Completed"}), 201
 
 
 @app.route("/user/<int:user_id>", methods=["PUT"])
@@ -92,7 +93,7 @@ def put_user(user_id):
         user.password = request_body["password"]
 
     user.update()
-    return jsonify({"msg": "Updated"})
+    return jsonify({"msg": "Updated"}), 200
 
 
 @app.route("/user/<int:user_id>", methods=["DELETE"])
@@ -100,10 +101,81 @@ def delete_user(user_id):
     user = User.query.get(user_id)
     if user is None:
         raise APIException("The user doesn't exist", status_code=400)
-    
-    user.delete()
-    return jsonify({"msg": "Completed"})
 
+    user.delete()
+    return jsonify({"msg": "Completed"}), 200
+
+# <-- Characters Methods -->
+
+
+@app.route("/character", methods=["GET"])
+def get_characters():
+    characters = Characters.query.all()
+
+    if not characters:
+        response_body = {
+            "msg": "No characters available."
+        }
+    else:
+        all_characters = list(
+            map(lambda characters: characters.serialize(), characters))
+        response_body = {
+            "msg": "GET /characters response",
+            "characters": all_characters
+        }
+
+    return jsonify(response_body), 200
+
+
+@app.route("/character", methods=["POST"])
+def post_chracter():
+    request_body = request.get_json(silent=True)
+    if request_body is None:
+        raise APIException("You must send information!", status_code=400)
+    if "uid" not in request_body:
+        raise APIException("Uid is required", status_code=400)
+    if "name" not in request_body:
+        raise APIException("Name is required", status_code=400)
+    if "url" not in request_body:
+        raise APIException("Url is required", status_code=400)
+
+    character = Characters(
+        uid=request_body["uid"], name=request_body["name"], url=request_body["url"])
+    character.add()
+
+    return jsonify({"msg": "Completed"}), 201
+
+
+@app.route("/character/<int:character_uid>", methods=["PUT"])
+def put_character(character_uid):
+    request_body = request.get_json(silent=True)
+
+    character = Characters.query.filter_by(uid=character_uid).first()
+    
+    if character is None:
+        raise APIException("Character not found", status_code=400)
+    if request_body is None:
+        raise APIException("You must send new information", status_code=400)
+    if "uid" in request_body:
+        character.uid = request_body["uid"]
+    if "name" in request_body:
+        character.name = request_body["name"]
+    if "url" in request_body:
+        character.url = request_body["url"]
+    
+    character.update()
+    
+    return jsonify({"msg": "Updated"}), 200
+
+@app.route("/character/<int:character_uid>", methods=["DELETE"])
+def delete_character(character_uid):
+    character = Characters.query.filter_by(uid=character_uid).first() 
+    
+    if character is None:
+        raise APIException("Character not found", status_code=400)
+    
+    character.delete()
+    return jsonify({"msg": "Completed"}), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':

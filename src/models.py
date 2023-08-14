@@ -36,8 +36,8 @@ class Characters(db.Model):
     __tablename__ = "characters"
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.Integer, unique=True, nullable=False)
-    name = db.Column(db.String(15), index=True)
-    url = db.Column(db.String(20), unique=True)
+    name = db.Column(db.String(15), index=True, unique=True, nullable=False)
+    url = db.Column(db.String(50), unique=True)
 
     def __repr__(self):
         return "<Characters %r>" % self.username
@@ -66,8 +66,8 @@ class Planets(db.Model):
     __tablename__ = "planets"
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.Integer, unique=True, nullable=False)
-    name = db.Column(db.String(15), index=True)
-    url = db.Column(db.String(20), unique=True)
+    name = db.Column(db.String(15), index=True, unique=True, nullable=False)
+    url = db.Column(db.String(50), unique=True)
 
     def __repr__(self):
         return "<Planets %r>" % self.username
@@ -96,8 +96,8 @@ class Vehicles(db.Model):
     __tablename__ = "vehicles"
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     uid = db.Column(db.Integer, unique=True)
-    name = db.Column(db.String(15), index=True)
-    url = db.Column(db.String(20), unique=True)
+    name = db.Column(db.String(15), index=True, unique=True, nullable=False)
+    url = db.Column(db.String(50), unique=True)
 
     def __repr__(self):
         return "<Vehicles %r>" % self.username
