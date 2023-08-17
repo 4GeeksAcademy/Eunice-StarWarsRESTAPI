@@ -184,20 +184,20 @@ def delete_character(character_uid):
 # <-- Characters Details -->
 
 
-@app.route("/characters/<int:character_uid>", methods=["GET"])
+@app.route("/characters/details/<int:character_uid>", methods=["GET"])
 def get_characters_details(character_uid):
-    characters = Characters_Details.query.filter_by(
+    characters_details = Characters_Details.query.filter_by(
         uid=character_uid).first()
 
-    if not characters:
+    if not characters_details:
         response_body = {
             "msg": "No character details available."
         }
-        return jsonify(response_body), 404 
+        return jsonify(response_body), 404
     else:
         response_body = {
             "msg": "ok",
-            "characters": characters.serialize()
+            "characters_details": characters_details.serialize()
         }
         return jsonify(response_body), 200
 
@@ -209,6 +209,20 @@ def post_character_details():
         raise APIException("You must send information!", status_code=400)
     if "uid" not in request_body:
         raise APIException("Uid is required", status_code=400)
+    if "height" not in request_body:
+        raise APIException("Height is required", status_code=400)
+    if "mass" not in request_body:
+        raise APIException("Mass is required", status_code=400)
+    if "hair_color" not in request_body:
+        raise APIException("Hair color is required", status_code=400)
+    if "skin_color" not in request_body:
+        raise APIException("Skin color is required", status_code=400)
+    if "eye_color" not in request_body:
+        raise APIException("Eye color is required", status_code=400)
+    if "birth_year" not in request_body:
+        raise APIException("Birth year is required", status_code=400)
+    if "gender" not in request_body:
+        raise APIException("Gender is required", status_code=400)
     if "planetland" not in request_body:
         raise APIException("Planetland is required", status_code=400)
 
@@ -229,39 +243,53 @@ def post_character_details():
     return jsonify({"msg": "Completed"}), 201
 
 
-""" @app.route("/characters/<int:character_uid>", methods=["PUT"])
+@app.route("/characters/details/<int:character_uid>", methods=["PUT"])
 def put_character_details(character_uid):
     request_body = request.get_json(silent=True)
 
-    character = Characters.query.filter_by(uid=character_uid).first()
+    characters_details = Characters_Details.query.filter_by(
+        uid=character_uid).first()
 
-    if character is None:
-        raise APIException("Character not found", status_code=400)
+    if characters_details is None:
+        raise APIException("Character Details not found", status_code=400)
     if request_body is None or not any(request_body.values()):
         raise APIException("You must send new information", status_code=400)
     if "uid" in request_body:
-        character.uid = request_body["uid"]
-    if "name" in request_body:
-        character.name = request_body["name"]
-    if "url" in request_body:
-        character.url = request_body["url"]
+        characters_details.uid = request_body["uid"]
+    if "height" in request_body:
+        characters_details.height = request_body["height"]
+    if "mass" in request_body:
+        characters_details.mass = request_body["mass"]
+    if "hair_color" in request_body:
+        characters_details.hair_color = request_body["hair_color"]
+    if "skin_color" in request_body:
+        characters_details.skin_color = request_body["skin_color"]
+    if "eye_color" in request_body:
+        characters_details.eye_color = request_body["eye_color"]
+    if "birth_year" in request_body:
+        characters_details.birth_year = request_body["birth_year"]
+    if "gender" in request_body:
+        characters_details.gender = request_body["gender"]
+    if "planetland" in request_body:
+        characters_details.planetland = request_body["planetland"]
 
-    character.update()
+    characters_details.update()
 
     return jsonify({"msg": "Updated"}), 200
 
 
-@app.route("/characters/<int:character_uid>", methods=["DELETE"])
+@app.route("/characters/details/<int:character_uid>", methods=["DELETE"])
 def delete_character_details(character_uid):
-    character = Characters.query.filter_by(uid=character_uid).first()
+    character_details = Characters_Details.query.filter_by(
+        uid=character_uid).first()
 
-    if character is None:
-        raise APIException("Character not found", status_code=400)
+    if character_details is None:
+        raise APIException("Character Details not found", status_code=400)
 
-    character.delete()
+    character_details.delete()
     return jsonify({"msg": "Completed"}), 200
 
- """
+
 # <-- Planets Methods -->
 
 
@@ -330,7 +358,113 @@ def delete_planet(planet_uid):
     if planet is None:
         raise APIException("Character not found", status_code=400)
 
+    for detail in planet.characters_details:
+        detail.planetland = None
+
     planet.delete()
+    return jsonify({"msg": "Completed"}), 200
+
+
+# <-- Planets Details -->
+
+@app.route("/planets/details/<int:planet_uid>", methods=["GET"])
+def get_planets_details(planet_uid):
+    planets_details = Planets_Details.query.filter_by(
+        uid=planet_uid).first()
+
+    if not planets_details:
+        response_body = {
+            "msg": "No planet details available."
+        }
+        return jsonify(response_body), 404
+    else:
+        response_body = {
+            "msg": "ok",
+            "planets_details": planets_details.serialize()
+        }
+        return jsonify(response_body), 200
+
+
+@app.route("/planets/details", methods=["POST"])
+def post_planet_details():
+    request_body = request.get_json(silent=True)
+    if request_body is None:
+        raise APIException("You must send information!", status_code=400)
+    if "uid" not in request_body:
+        raise APIException("Uid is required", status_code=400)
+    if "population" not in request_body:
+        raise APIException("Population is required", status_code=400)
+    if "gravity" not in request_body:
+        raise APIException("Gravity is required", status_code=400)
+    if "rotation_period" not in request_body:
+        raise APIException("Rotation period is required", status_code=400)
+    if "orbital_period" not in request_body:
+        raise APIException("Orbital period is required", status_code=400)
+    if "climate" not in request_body:
+        raise APIException("Climate is required", status_code=400)
+    if "terrain" not in request_body:
+        raise APIException("Terrain is required", status_code=400)
+    if "surface_water" not in request_body:
+        raise APIException("Surface water is required", status_code=400)
+
+    planet_details = Planets_Details(
+        uid=request_body["uid"],
+        population=request_body["population"],
+        gravity=request_body["gravity"],
+        rotation_period=request_body["rotation_period"],
+        orbital_period=request_body["orbital_period"],
+        climate=request_body["climate"],
+        terrain=request_body["terrain"],
+        surface_water=request_body["surface_water"]
+    )
+
+    planet_details.add()
+
+    return jsonify({"msg": "Completed"}), 201
+
+
+@app.route("/planets/details/<int:planet_uid>", methods=["PUT"])
+def put_planet_details(planet_uid):
+    request_body = request.get_json(silent=True)
+
+    planets_details = Planets_Details.query.filter_by(
+        uid=planet_uid).first()
+
+    if planets_details is None:
+        raise APIException("planet Details not found", status_code=400)
+    if request_body is None or not any(request_body.values()):
+        raise APIException("You must send new information", status_code=400)
+    if "uid" in request_body:
+        planets_details.uid = request_body["uid"]
+    if "population" in request_body:
+        planets_details.population = request_body["height"]
+    if "gravity" in request_body:
+        planets_details.gravity = request_body["gravity"]
+    if "rotation_period" in request_body:
+        planets_details.rotation_period = request_body["rotation_period"]
+    if "orbital_period" in request_body:
+        planets_details.orbital_period = request_body["orbital_period"]
+    if "climate" in request_body:
+        planets_details.climate = request_body["climate"]
+    if "terrain" in request_body:
+        planets_details.terrain = request_body["terrain"]
+    if "surface_water" in request_body:
+        planets_details.surface_water = request_body["surface_water"]
+
+    planets_details.update()
+
+    return jsonify({"msg": "Updated"}), 200
+
+
+@app.route("/planets/details/<int:planet_uid>", methods=["DELETE"])
+def delete_planet_details(planet_uid):
+    planet_details = Planets_Details.query.filter_by(
+        uid=planet_uid).first()
+
+    if planet_details is None:
+        raise APIException("Planet Details not found", status_code=400)
+
+    planet_details.delete()
     return jsonify({"msg": "Completed"}), 200
 
 
@@ -404,6 +538,248 @@ def delete_vehicle(vehicle_uid):
 
     vehicle.delete()
     return jsonify({"msg": "Completed"}), 200
+
+
+# <-- Vehicles Details -->
+
+@app.route("/vehicles/details/<int:vehicle_uid>", methods=["GET"])
+def get_vehicles_details(vehicle_uid):
+    vehicles_details = Vehicles_Details.query.filter_by(
+        uid=vehicle_uid).first()
+
+    if not vehicles_details:
+        response_body = {
+            "msg": "No vehicle details available."
+        }
+        return jsonify(response_body), 404
+    else:
+        response_body = {
+            "msg": "ok",
+            "vehicles_details": vehicles_details.serialize()
+        }
+        return jsonify(response_body), 200
+
+
+@app.route("/vehicles/details", methods=["POST"])
+def post_vehicle_details():
+    request_body = request.get_json(silent=True)
+    if request_body is None:
+        raise APIException("You must send information!", status_code=400)
+    if "uid" not in request_body:
+        raise APIException("Uid is required", status_code=400)
+    if "model" not in request_body:
+        raise APIException("Model is required", status_code=400)
+    if "vehicle_class" not in request_body:
+        raise APIException("Vehicle class is required", status_code=400)
+    if "manufacturer" not in request_body:
+        raise APIException("Manufacturer is required", status_code=400)
+    if "cost_in_credits" not in request_body:
+        raise APIException("Cost in credits is required", status_code=400)
+    if "length" not in request_body:
+        raise APIException("Length is required", status_code=400)
+    if "crew" not in request_body:
+        raise APIException("Crew is required", status_code=400)
+    if "passengers" not in request_body:
+        raise APIException("Passengers is required", status_code=400)
+    if "max_atmosphering_speed" not in request_body:
+        raise APIException(
+            "Max atmosphering speed is required", status_code=400)
+    if "cargo_capacity" not in request_body:
+        raise APIException("Cargo capacity is required", status_code=400)
+    if "consumables" not in request_body:
+        raise APIException("Consumables is required", status_code=400)
+
+    vehicle_details = Vehicles_Details(
+        uid=request_body["uid"],
+        model=request_body["model"],
+        vehicle_class=request_body["vehicle_class"],
+        manufacturer=request_body["manufacturer"],
+        cost_in_credits=request_body["cost_in_credits"],
+        length=request_body["length"],
+        crew=request_body["crew"],
+        passengers=request_body["passengers"],
+        max_atmosphering_speed=request_body["max_atmosphering_speed"],
+        cargo_capacity=request_body["crew"],
+        consumables=request_body["consumables"]
+    )
+
+    vehicle_details.add()
+
+    return jsonify({"msg": "Completed"}), 201
+
+
+@app.route("/vehicles/details/<int:vehicle_uid>", methods=["PUT"])
+def put_vehicle_details(vehicle_uid):
+    request_body = request.get_json(silent=True)
+
+    vehicles_details = Vehicles_Details.query.filter_by(
+        uid=vehicle_uid).first()
+
+    if vehicles_details is None:
+        raise APIException("vehicle Details not found", status_code=400)
+    if request_body is None or not any(request_body.values()):
+        raise APIException("You must send new information", status_code=400)
+    if "uid" in request_body:
+        vehicles_details.uid = request_body["uid"]
+    if "model" in request_body:
+        vehicles_details.model = request_body["model"]
+    if "vehicles_details_class" in request_body:
+        vehicles_details.vehicle_class = request_body["vehicle_class"]
+    if "manufacturer" in request_body:
+        vehicles_details.manufacturer = request_body["manufacturer"]
+    if "cost_in_credits" in request_body:
+        vehicles_details.cost_in_credits = request_body["cost_in_credits"]
+    if "length" in request_body:
+        vehicles_details.length = request_body["length"]
+    if "crew" in request_body:
+        vehicles_details.crew = request_body["crew"]
+    if "passengers" in request_body:
+        vehicles_details.passengers = request_body["passengers"]
+    if "max_atmosphering_speed" in request_body:
+        vehicles_details.max_atmosphering_speed = request_body["max_atmosphering_speed"]
+    if "cargo_capacity" in request_body:
+        vehicles_details.cargo_capacity = request_body["cargo_capacity"]
+    if "consumables" in request_body:
+        vehicles_details.consumables = request_body["consumables"]
+
+    vehicles_details.update()
+
+    return jsonify({"msg": "Updated"}), 200
+
+
+@app.route("/vehicles/details/<int:vehicle_uid>", methods=["DELETE"])
+def delete_vehicle_details(vehicle_uid):
+    vehicle_details = Vehicles_Details.query.filter_by(
+        uid=vehicle_uid).first()
+
+    if vehicle_details is None:
+        raise APIException("Vehicle Details not found", status_code=400)
+
+    vehicle_details.delete()
+    return jsonify({"msg": "Completed"}), 200
+
+
+# <-- Favorites -->
+
+@app.route("/user/favorites/<int:user_id>", methods=["GET"])
+def get_favorites(user_id):
+    favorite_characters = Favorite_Characters.query.filter_by(user_id=user_id)
+    all_characters_favorites = list(
+        map(lambda characters: characters.serialize, favorite_characters))
+
+    favorite_planets = Favorite_Planets.query.filter_by(user_id=user_id)
+    all_planets_favorites = list(
+        map(lambda planets: planets.serialize, favorite_planets))
+
+    favorite_vehicles = Favorite_Vehicles.query.filter_by(user_id=user_id)
+    all_vehicles_favorites = list(
+        map(lambda vehicles: vehicles.serialize, favorite_vehicles))
+
+    response_body = {
+        "favorites": {
+            "characters": all_characters_favorites,
+            "planets": all_planets_favorites,
+            "vehicles": all_vehicles_favorites
+        }
+    }
+
+    return jsonify(response_body), 200
+
+# <-- Favorite Characters -->
+
+
+@app.route("/favorite/characters/<int:user_id>", methods=["POST"])
+def post_favorite_characters(user_id):
+    request_body = request.get_json(silent=True)
+
+    if "character_id" not in request_body:
+        raise APIException("Character id is requerid", status_code=400)
+
+    favorite_characters = Favorite_Characters(
+        user_id=user_id,
+        character_id=request_body["character_id"]
+    )
+
+    favorite_characters.add()
+
+    return jsonify({"msg": "Completed"}), 201
+
+
+@app.route("/favorite/characters/<int:user_id>/<int:character_id>", methods=["DELETE"])
+def delete_favorite_character(user_id, character_id):
+    favorite_character = Favorite_Characters.query.filter_by(
+        user_id=user_id, character_id=character_id).first()
+
+    if favorite_character is None:
+        return jsonify({"error": "Favorite character not found"}), 404
+
+    favorite_character.delete()
+
+    return jsonify({"message": "Favorite character removed"}), 200
+
+# <-- Favorite Planets -->
+
+
+@app.route("/favorite/planets/<int:user_id>", methods=["POST"])
+def post_favorite_planets(user_id):
+    request_body = request.get_json(silent=True)
+
+    if "planet_id" not in request_body:
+        raise APIException("Planet id is requerid", status_code=400)
+
+    favorite_planets = Favorite_Planets(
+        user_id=user_id,
+        planet_id=request_body["planet_id"]
+    )
+
+    favorite_planets.add()
+
+    return jsonify({"msg": "Completed"}), 201
+
+
+@app.route("/favorite/planets/<int:user_id>/<int:planet_id>", methods=["DELETE"])
+def delete_favorite_planet(user_id, planet_id):
+    favorite_planet = Favorite_Planets.query.filter_by(
+        user_id=user_id, planet_id=planet_id).first()
+
+    if favorite_planet is None:
+        return jsonify({"error": "Favorite planet not found"}), 404
+
+    favorite_planet.delete()
+
+    return jsonify({"message": "Favorite planet removed"}), 200
+
+# <-- Favorite Vehicles -->
+
+
+@app.route("/favorite/vehicles/<int:user_id>", methods=["POST"])
+def post_favorite_vehicles(user_id):
+    request_body = request.get_json(silent=True)
+
+    if "vehicle_id" not in request_body:
+        raise APIException("Vehicle id is requerid", status_code=400)
+
+    favorite_vehicles = Favorite_Vehicles(
+        user_id=user_id,
+        vehicle_id=request_body["vehicle_id"]
+    )
+
+    favorite_vehicles.add()
+
+    return jsonify({"msg": "Completed"}), 201
+
+
+@app.route("/favorite/vehicles/<int:user_id>/<int:vehicle_id>", methods=["DELETE"])
+def delete_favorite_vehicle(user_id, vehicle_id):
+    favorite_vehicle = Favorite_Vehicles.query.filter_by(
+        user_id=user_id, vehicle_id=vehicle_id).first()
+
+    if favorite_vehicle is None:
+        return jsonify({"error": "Favorite vehicle not found"}), 404
+
+    favorite_vehicle.delete()
+
+    return jsonify({"message": "Favorite vehicle removed"}), 200
 
 
 # this only runs if `$ python src/app.py` is executed

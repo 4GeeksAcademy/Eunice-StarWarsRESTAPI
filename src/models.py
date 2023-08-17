@@ -25,6 +25,15 @@ class User(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def get_characters_favorites(self):
+        return list(map(lambda people: people.serialize(), self.people))
+
+    def get_planets_favorites(self):
+        return list(map(lambda planets: planets.serialize(), self.planets))
+
+    def get_vehicles_favorites(self):
+        return list(map(lambda vehicles: vehicles.serialize(), self.vehicles))
+
     def serialize(self):
         return {
             "id": self.id,
@@ -78,7 +87,17 @@ class Planets_Details(db.Model):
     surface_water = db.Column(db.String(15))
     planets = db.relationship(Planets)
 
-    def serialize(self):
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
         return {
             "id": self.id,
             "uid": self.uid,
@@ -100,13 +119,6 @@ class Favorite_Planets(db.Model):
     user = db.relationship(User)
     planets = db.relationship(Planets)
 
-    def serialize(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "planet_id": self.planet_id
-        }
-
     def add(self):
         db.session.add(self)
         db.session.commit()
@@ -114,6 +126,13 @@ class Favorite_Planets(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "planet_id": self.planet_id
+        }
 
 
 class Characters(db.Model):
@@ -162,7 +181,17 @@ class Characters_Details(db.Model):
     characters = db.relationship(Characters)
     planets = db.relationship(Planets)
 
-    def serialize(self):
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
         return {
             "id": self.id,
             "uid": self.uid,
@@ -248,7 +277,17 @@ class Vehicles_Details(db.Model):
     consumables = db.Column(db.String(15))
     vehicles = db.relationship(Vehicles)
 
-    def serialize(self):
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
         return {
             "id": self.id,
             "uid": self.uid,
